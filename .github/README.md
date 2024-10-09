@@ -11,3 +11,6 @@ Make sure you have `EnablePlayerSettings` enabled in your worldserver config. It
 ## What is this module?
 
 This module allows users to grant rested XP bonuses to players who have not logged in X days.
+
+## Authors
+- [Nyeriah](https://github.com/Nyeriah)
