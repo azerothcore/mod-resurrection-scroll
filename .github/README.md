@@ -1,4 +1,4 @@
-# MOD-RESURRECTION-SCROLL
+# Mod-Resurrection-Scroll
 
 [English](README.md)
 
