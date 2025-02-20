@@ -20,7 +20,7 @@ class mod_resurrection_scroll_playerscript : public PlayerScript
 public:
     mod_resurrection_scroll_playerscript() : PlayerScript("mod_resurrection_scroll_playerscript") { }
 
-    void OnLogin(Player* player) override
+    void OnPlayerLogin(Player* player) override
     {
         if (!sResScroll->IsEnabled)
            return;
@@ -41,7 +41,7 @@ public:
         }
     }
 
-    void OnLevelChanged(Player* player, uint8 /*oldlevel*/) override
+    void OnPlayerLevelChanged(Player* player, uint8 /*oldlevel*/) override
     {
         if (!sResScroll->IsEnabled)
             return;
