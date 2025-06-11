@@ -34,11 +34,15 @@ public:
         if (ProcessBonusChecks(player))
             return;
 
-        uint32 validLastLogoutDate = GameTime::GetGameTime().count() - (sResScroll->DaysInactive * DAY);
+        if (!player->GetSession())
+            return;
 
-        if (CharacterDatabase.Query("SELECT 1 FROM characters WHERE guid = {} AND logout_time <= {}", player->GetGUID().GetCounter(), validLastLogoutDate))
+        uint32 now = GameTime::GetGameTime().count();
+        uint32 validLastLogoutDate = now - (sResScroll->DaysInactive * DAY);
+
+        if (CharacterDatabase.Query("SELECT 1 FROM characters WHERE account = {} AND logout_time <= {}", player->GetSession()->GetAccountId(), validLastLogoutDate))
         {
-            uint32 duration = GameTime::GetGameTime().count() + (sResScroll->Duration * DAY);
+            uint32 duration = now + (sResScroll->Duration * DAY);
             player->SetRestBonus(sObjectMgr->GetXPForLevel(player->GetLevel()));
             player->UpdatePlayerSetting(ModResScrollString, SETTING_RS_ELIGIBLE, 1);
             player->UpdatePlayerSetting(ModResScrollString, SETTING_RS_DISABLE_DATE, duration);
