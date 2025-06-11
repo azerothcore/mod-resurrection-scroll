@@ -28,6 +28,9 @@ public:
         if (!sResScroll->IsEnabled)
            return;
 
+        if (player->GetLevel() == 1)
+            return;
+
         if (ProcessBonusChecks(player))
             return;
 
@@ -54,6 +57,9 @@ public:
 
     bool ProcessBonusChecks(Player* player)
     {
+        if (player->HasAnyAuras(2000100, 2000101, 2000102))
+            return false;
+
         if (player->GetPlayerSetting(ModResScrollString, SETTING_RS_ELIGIBLE).value)
         {
             uint32 epochEndDate = player->GetPlayerSetting(ModResScrollString, SETTING_RS_DISABLE_DATE).value;
