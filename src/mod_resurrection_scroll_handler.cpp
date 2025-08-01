@@ -5,7 +5,6 @@
 #include "Chat.h"
 #include "GameTime.h"
 #include "ScriptMgr.h"
-#include "Smartstone.h"
 #include "Player.h"
 #include "ResurrectionScroll.h"
 
