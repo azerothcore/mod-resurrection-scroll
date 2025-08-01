@@ -44,7 +44,7 @@ public:
         ScrollAccountData accountData = sResScroll->GetAccountData(player->GetSession()->GetAccountId());
 
         if (accountData.Expired)
-            return;
+            return false;
 
         tm end = Acore::Time::TimeBreakdown(accountData.EndDate);
 
@@ -94,10 +94,23 @@ public:
 
         uint32 now = GameTime::GetGameTime().count();
         uint32 validLastLogoutDate = now - (sResScroll->DaysInactive * DAY);
-        if (QueryResult result = CharacterDatabase.Query("SELECT logout_time FROM characters WHERE account = {} AND logout_time <= {}", accountId, validLastLogoutDate))
+
+        // Get the most recent logout time among all characters
+        if (QueryResult result = CharacterDatabase.Query(
+            "SELECT MAX(logout_time) FROM characters WHERE account = {}", accountId))
         {
-            uint32 duration = now + (sResScroll->Duration * DAY);
-            sResScroll->InsertAccountData(ScrollAccountData(accountId, (*result)[0].Get<uint32>(), duration));
+            Field* fields = result->Fetch();
+            if (!fields->IsNull())
+            {
+                uint32 lastLogoutTime = fields[0].Get<uint32>();
+
+                // Only reward if last logout was at least 30 days ago
+                if (lastLogoutTime <= validLastLogoutDate)
+                {
+                    uint32 expiration = now + (sResScroll->Duration * DAY);
+                    sResScroll->InsertAccountData(ScrollAccountData(accountId, lastLogoutTime, expiration));
+                }
+            }
         }
     }
 };

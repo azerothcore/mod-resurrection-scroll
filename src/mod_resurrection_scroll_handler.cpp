@@ -19,7 +19,7 @@ void ResurrectionScroll::InsertAccountData(ScrollAccountData data)
 {
     Accounts[data.AccountId] = data;
 
-    CharacterDatabase.Query("REPLACE INTO mod_ress_scroll_accounts (AccountId, EndDate) VALUES (?, ?)", data.AccountId, data.EndDate);
+    CharacterDatabase.Query("REPLACE INTO mod_ress_scroll_accounts (AccountId, EndDate) VALUES ({}, {})", data.AccountId, data.EndDate);
 }
 
 void ResurrectionScroll::SetExpired(uint32 accountId)
@@ -28,6 +28,6 @@ void ResurrectionScroll::SetExpired(uint32 accountId)
     if (itr != Accounts.end())
     {
         itr->second.Expired = true;
-        CharacterDatabase.Query("UPDATE mod_ress_scroll_accounts SET Expired = 1 WHERE AccountId = ?", accountId);
+        CharacterDatabase.Query("UPDATE mod_ress_scroll_accounts SET Expired = 1 WHERE AccountId = {}", accountId);
     }
 }
