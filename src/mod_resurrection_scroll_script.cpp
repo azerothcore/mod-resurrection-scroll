@@ -92,8 +92,7 @@ public:
 class mod_resurrection_scroll_accountscript : public AccountScript
 {
 public:
-    mod_resurrection_scroll_accountscript() : AccountScript("mod_resurrection_scroll_accountscript") {
-    }
+    mod_resurrection_scroll_accountscript() : AccountScript("mod_resurrection_scroll_accountscript", { ACCOUNTHOOK_ON_ACCOUNT_LOGIN }) {}
 
     void OnAccountLogin(uint32 accountId) override
     {
@@ -112,7 +111,7 @@ public:
             {
                 uint32 lastLogoutTime = fields[0].Get<uint32>();
 
-                // Only reward if last logout was at least 30 days ago
+                // Only reward if last logout was at least N days ago
                 if (lastLogoutTime <= validLastLogoutDate)
                 {
                     uint32 expiration = now + (sResScroll->Duration * DAY);
