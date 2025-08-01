@@ -9,12 +9,6 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 
-ResurrectionScroll* ResurrectionScroll::instance()
-{
-    static ResurrectionScroll instance;
-    return &instance;
-}
-
 class mod_resurrection_scroll_playerscript : public PlayerScript
 {
 public:
@@ -31,24 +25,7 @@ public:
         if (player->GetLevel() == 1)
             return;
 
-        if (ProcessBonusChecks(player))
-            return;
-
-        if (!player->GetSession())
-            return;
-
-        uint32 now = GameTime::GetGameTime().count();
-        uint32 validLastLogoutDate = now - (sResScroll->DaysInactive * DAY);
-
-        if (CharacterDatabase.Query("SELECT 1 FROM characters WHERE account = {} AND logout_time <= {}", player->GetSession()->GetAccountId(), validLastLogoutDate))
-        {
-            uint32 duration = now + (sResScroll->Duration * DAY);
-            player->SetRestBonus(sObjectMgr->GetXPForLevel(player->GetLevel()));
-            player->UpdatePlayerSetting(ModResScrollString, SETTING_RS_ELIGIBLE, 1);
-            player->UpdatePlayerSetting(ModResScrollString, SETTING_RS_DISABLE_DATE, duration);
-            tm endDate = Acore::Time::TimeBreakdown(duration);
-            ChatHandler(player->GetSession()).PSendSysMessage("|cff00ccffYou are eligible for the Scroll of Resurrection program, granting you rested experience until {:%Y-%m-%d %H:%M}.|r", endDate);
-        }
+        ProcessBonusChecks(player);
     }
 
     void OnPlayerLevelChanged(Player* player, uint8 /*oldlevel*/) override
@@ -59,26 +36,28 @@ public:
         ProcessBonusChecks(player);
     }
 
-    bool ProcessBonusChecks(Player* player)
+    bool ProcessBonusChecks(Player* player) const
     {
         if (player->HasAnyAuras(2000100, 2000101, 2000102))
             return false;
 
-        if (player->GetPlayerSetting(ModResScrollString, SETTING_RS_ELIGIBLE).value)
+        ScrollAccountData accountData = sResScroll->GetAccountData(player->GetSession()->GetAccountId());
+
+        if (accountData.Expired)
+            return;
+
+        tm end = Acore::Time::TimeBreakdown(accountData.EndDate);
+
+        if (accountData.EndDate && (accountData.EndDate > GameTime::GetGameTime().count()))
         {
-            uint32 epochEndDate = player->GetPlayerSetting(ModResScrollString, SETTING_RS_DISABLE_DATE).value;
-            tm end = Acore::Time::TimeBreakdown(epochEndDate);
-
-            if (GameTime::GetGameTime().count() <= epochEndDate)
-            {
-                player->UpdatePlayerSetting(ModResScrollString, SETTING_RS_ELIGIBLE, 0);
-                ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000You are no longer eligible for the Scroll of Resurrection program. Your bonus ended in: {:%Y-%m-%d %H:%M}.|r", end);
-                return true;
-            }
-
             player->SetRestBonus(sObjectMgr->GetXPForLevel(player->GetLevel()));
             ChatHandler(player->GetSession()).PSendSysMessage("|cff00ccffYou are eligible for the Scroll of Resurrection program, granting you rested experience until {:%Y-%m-%d %H:%M}.|r", end);
             return true;
+        }
+        else
+        {
+            sResScroll->SetExpired(player->GetSession()->GetAccountId());
+            ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000Your Scroll of Resurrection bonus has expired.|r");
         }
 
         return false;
@@ -100,8 +79,32 @@ public:
     }
 };
 
+class mod_resurrection_scroll_accountscript : public AccountScript
+{
+public:
+    mod_resurrection_scroll_accountscript() : AccountScript("mod_resurrection_scroll_accountscript", {
+        ACCOUNTHOOK_ON_ACCOUNT_LOGIN
+        }) {
+    }
+
+    void OnAccountLogin(uint32 accountId) override
+    {
+        if (!sResScroll->IsEnabled)
+            return;
+
+        uint32 now = GameTime::GetGameTime().count();
+        uint32 validLastLogoutDate = now - (sResScroll->DaysInactive * DAY);
+        if (QueryResult result = CharacterDatabase.Query("SELECT logout_time FROM characters WHERE account = {} AND logout_time <= {}", accountId, validLastLogoutDate))
+        {
+            uint32 duration = now + (sResScroll->Duration * DAY);
+            sResScroll->InsertAccountData(ScrollAccountData(accountId, (*result)[0].Get<uint32>(), duration));
+        }
+    }
+};
+
 void AddModResurrectionScrollScripts()
 {
     new mod_resurrection_scroll_playerscript();
     new mod_resurrection_scroll_worldscript();
+    new mod_resurrection_scroll_accountscript();
 }
