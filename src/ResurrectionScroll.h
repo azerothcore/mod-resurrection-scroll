@@ -45,7 +45,9 @@ public:
 
         return { 0, 0, 0, false };
     }
+
     void SetExpired(uint32 accountId);
+    void LoadAccountData();
 };
 
 #define sResScroll ResurrectionScroll::instance()

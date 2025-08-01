@@ -41,25 +41,30 @@ public:
         if (player->HasAnyAuras(2000100, 2000101, 2000102))
             return false;
 
-        ScrollAccountData accountData = sResScroll->GetAccountData(player->GetSession()->GetAccountId());
+        uint32 accountId = player->GetSession()->GetAccountId();
+        ScrollAccountData const& accountData = sResScroll->GetAccountData(accountId);
 
         if (accountData.Expired)
             return false;
 
-        tm end = Acore::Time::TimeBreakdown(accountData.EndDate);
-
-        if (accountData.EndDate && (accountData.EndDate > GameTime::GetGameTime().count()))
+        uint32 now = GameTime::GetGameTime().count();
+        if (accountData.EndDate && accountData.EndDate > now)
         {
             player->SetRestBonus(sObjectMgr->GetXPForLevel(player->GetLevel()));
-            ChatHandler(player->GetSession()).PSendSysMessage("|cff00ccffYou are eligible for the Scroll of Resurrection program, granting you rested experience until {:%Y-%m-%d %H:%M}.|r", end);
+
+            tm endTime = Acore::Time::TimeBreakdown(accountData.EndDate);
+            ChatHandler(player->GetSession()).PSendSysMessage(
+                "|cff00ccffYou are eligible for the Scroll of Resurrection program, granting you rested experience until {:%Y-%m-%d %H:%M}.|r",
+                endTime
+            );
             return true;
         }
-        else
-        {
-            sResScroll->SetExpired(player->GetSession()->GetAccountId());
-            ChatHandler(player->GetSession()).PSendSysMessage("|cffff0000Your Scroll of Resurrection bonus has expired.|r");
-        }
 
+        // Bonus expired — update record
+        sResScroll->SetExpired(accountId);
+        ChatHandler(player->GetSession()).PSendSysMessage(
+            "|cffff0000Your Scroll of Resurrection bonus has expired.|r"
+        );
         return false;
     }
 };
@@ -71,20 +76,23 @@ public:
         WORLDHOOK_ON_AFTER_CONFIG_LOAD
     }) { }
 
-    void OnAfterConfigLoad(bool /*reload*/) override
+    void OnAfterConfigLoad(bool reload) override
     {
         sResScroll->IsEnabled = sConfigMgr->GetOption<bool>("ModResurrectionScroll.Enable", false);
         sResScroll->DaysInactive = sConfigMgr->GetOption<uint32>("ModResurrectionScroll.DaysInactive", 180);
         sResScroll->Duration = sConfigMgr->GetOption<uint32>("ModResurrectionScroll.Duration", 30);
+
+        if (!reload)
+        {
+            sResScroll->LoadAccountData();
+        }
     }
 };
 
 class mod_resurrection_scroll_accountscript : public AccountScript
 {
 public:
-    mod_resurrection_scroll_accountscript() : AccountScript("mod_resurrection_scroll_accountscript", {
-        ACCOUNTHOOK_ON_ACCOUNT_LOGIN
-        }) {
+    mod_resurrection_scroll_accountscript() : AccountScript("mod_resurrection_scroll_accountscript") {
     }
 
     void OnAccountLogin(uint32 accountId) override
