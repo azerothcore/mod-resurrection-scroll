@@ -50,6 +50,14 @@ public:
         uint32 now = GameTime::GetGameTime().count();
         if (accountData.EndDate && accountData.EndDate > now)
         {
+            if (player->GetPlayerSetting(ModResScrollString, SETTING_RS_DISABLE).IsEnabled())
+            {
+                player->SendSystemMessage(
+                    "|cffff0000You are eligible for the Scroll of Resurrection bonus, but it has been disabled. You can enable it to receive rewards.|r"
+                );
+                return false;
+            }
+
             player->SetRestBonus(sObjectMgr->GetXPForLevel(player->GetLevel()));
 
             tm endTime = Acore::Time::TimeBreakdown(accountData.EndDate);

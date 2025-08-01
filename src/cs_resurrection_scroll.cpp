@@ -33,12 +33,12 @@ public:
     {
         static ChatCommandTable scrollTable =
         {
-            { "rscroll restedxp", HandleResScrollRestedXpCommand, SEC_PLAYER, Console::Yes },
+            { "restedxp", HandleResScrollRestedXpCommand, SEC_PLAYER, Console::Yes }
         };
 
         static ChatCommandTable commandTable =
         {
-            { "", scrollTable },
+            { "rscroll", scrollTable },
         };
 
         return commandTable;
