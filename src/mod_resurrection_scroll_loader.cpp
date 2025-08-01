@@ -3,9 +3,11 @@
  */
 
 void AddModResurrectionScrollScripts();
+void AddSC_resurrection_scroll_commandscript();
 
 void Addmod_resurrection_scrollScripts()
 {
     AddModResurrectionScrollScripts();
+    AddSC_resurrection_scroll_commandscript();
 }
 

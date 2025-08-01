@@ -16,11 +16,10 @@ struct ScrollAccountData
 
 enum RSSettings
 {
-    SETTING_RS_ELIGIBLE      = 0,
-    SETTING_RS_DISABLE_DATE  = 1
+    SETTING_RS_DISABLE = 0
 };
 
-const std::string ModResScrollString = "mod_resurrection_scroll";
+const std::string ModResScrollString = "mod_ros";
 
 class ResurrectionScroll
 {
