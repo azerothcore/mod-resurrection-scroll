@@ -28,9 +28,12 @@ public:
         ProcessBonusChecks(player);
     }
 
-    void OnPlayerLevelChanged(Player* player, uint8 /*oldlevel*/) override
+    void OnPlayerLevelChanged(Player* player, uint8 oldlevel) override
     {
         if (!sResScroll->IsEnabled)
+            return;
+
+        if (oldlevel == sResScroll->GetMaxAffectedLevel())
             return;
 
         ProcessBonusChecks(player);
@@ -89,6 +92,7 @@ public:
         sResScroll->IsEnabled = sConfigMgr->GetOption<bool>("ModResurrectionScroll.Enable", false);
         sResScroll->DaysInactive = sConfigMgr->GetOption<uint32>("ModResurrectionScroll.DaysInactive", 180);
         sResScroll->Duration = sConfigMgr->GetOption<uint32>("ModResurrectionScroll.Duration", 30);
+        sResScroll->SetMaxAffectedLevel(sConfigMgr->GetOption<uint8>("ModResurrectionScroll.MaxAffectedLevel", 69));
 
         if (!reload)
         {

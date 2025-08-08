@@ -31,3 +31,10 @@ ModResurrectionScroll.DaysInactive = 180
 #
 
 ModResurrectionScroll.Duration = 30
+
+#
+#    ModResurrectionScroll.MaxAffectedLevel
+#        Description: Max affected level, no bonuses will be granted past that level.
+#        Default: 69
+
+ModResurrectionScroll.MaxAffectedLevel = 69

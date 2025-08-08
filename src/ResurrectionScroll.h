@@ -26,6 +26,7 @@ class ResurrectionScroll
 
 private:
     std::unordered_map<uint32, ScrollAccountData> Accounts;
+    uint8 MaxAffectedLevel{ 69 };
 
 public:
     static ResurrectionScroll* instance();
@@ -47,6 +48,9 @@ public:
 
     void SetExpired(uint32 accountId);
     void LoadAccountData();
+
+    [[nodiscard]] uint8 GetMaxAffectedLevel() const { return MaxAffectedLevel; }
+    void SetMaxAffectedLevel(uint8 level) { MaxAffectedLevel = level; }
 };
 
 #define sResScroll ResurrectionScroll::instance()
