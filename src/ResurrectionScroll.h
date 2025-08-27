@@ -13,6 +13,8 @@ struct ScrollAccountData
     uint32 EndDate;
     bool Expired;
 
+    ScrollAccountData() : AccountId(0), LastLogoutDate(0), EndDate(0), Expired(false) { }
+
     ScrollAccountData(uint32 accountId, uint32 logout, uint32 end, bool expired = false)
         : AccountId(accountId), LastLogoutDate(logout), EndDate(end), Expired(expired) { }
 };
