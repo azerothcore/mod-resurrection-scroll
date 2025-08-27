@@ -12,6 +12,9 @@ struct ScrollAccountData
     uint32 LastLogoutDate;
     uint32 EndDate;
     bool Expired;
+
+    ScrollAccountData(uint32 accountId, uint32 logout, uint32 end, bool expired = false)
+        : AccountId(accountId), LastLogoutDate(logout), EndDate(end), Expired(expired) { }
 };
 
 enum RSSettings
