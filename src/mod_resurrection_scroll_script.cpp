@@ -73,9 +73,9 @@ public:
 
         // Bonus expired — update record
         sResScroll->SetExpired(accountId);
-        ChatHandler(player->GetSession()).PSendSysMessage(
-            "|cffff0000Your Scroll of Resurrection bonus has expired.|r"
-        );
+        //ChatHandler(player->GetSession()).PSendSysMessage(
+       //     "|cffff0000Your Scroll of Resurrection bonus has expired.|r"
+        //);
         return false;
     }
 };
