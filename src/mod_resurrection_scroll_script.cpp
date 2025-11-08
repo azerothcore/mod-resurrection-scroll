@@ -25,6 +25,9 @@ public:
         if (player->GetLevel() == 1)
             return;
 
+        if (player->GetLevel() >= sResScroll->GetMaxAffectedLevel())
+            return;
+
         ProcessBonusChecks(player);
     }
 
@@ -33,7 +36,7 @@ public:
         if (!sResScroll->IsEnabled)
             return;
 
-        if (oldlevel == sResScroll->GetMaxAffectedLevel())
+        if (oldlevel >= sResScroll->GetMaxAffectedLevel())
             return;
 
         ProcessBonusChecks(player);
