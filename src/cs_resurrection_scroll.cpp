@@ -33,7 +33,7 @@ public:
     {
         static ChatCommandTable scrollTable =
         {
-            { "disablerestedxp", HandleResScrollRestedXpCommand, SEC_PLAYER, Console::Yes }
+            { "disable", HandleResScrollRestedXpCommand, SEC_PLAYER, Console::Yes }
         };
 
         static ChatCommandTable commandTable =
