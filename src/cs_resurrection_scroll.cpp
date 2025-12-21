@@ -61,7 +61,7 @@ public:
 
         targetPlayer->UpdatePlayerSetting(ModResScrollString, SETTING_RS_DISABLE, enable);
 
-        if (enable)
+        if (!enable)
             targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses enabled. You will now earn rested experience upon leveling up.");
         else
             targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses disabled.");
