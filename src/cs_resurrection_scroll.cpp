@@ -67,7 +67,7 @@ public:
             targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses disabled.");
 
         // Notify the command issuer
-        if (handler->GetSession()->GetPlayer() != targetPlayer)
+        if (!handler->GetSession() || handler->GetSession()->GetPlayer() != targetPlayer)
             handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for player {} ({}).", disable ? "disabled" : "enabled", targetPlayer->GetName(), targetPlayer->GetGUID().GetCounter());
         else
             handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for yourself.", disable ? "disabled" : "enabled");
