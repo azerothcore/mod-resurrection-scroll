@@ -44,7 +44,7 @@ public:
         return commandTable;
     }
 
-    static bool HandleResScrollRestedXpCommand(ChatHandler* handler, Optional<PlayerIdentifier> player, bool enable)
+    static bool HandleResScrollRestedXpCommand(ChatHandler* handler, Optional<PlayerIdentifier> player, bool disable)
     {
         if (handler->GetSession() && AccountMgr::IsPlayerAccount(handler->GetSession()->GetSecurity()))
             player = PlayerIdentifier::FromSelf(handler);
@@ -59,18 +59,18 @@ public:
             return false;
         }
 
-        targetPlayer->UpdatePlayerSetting(ModResScrollString, SETTING_RS_DISABLE, enable);
+        targetPlayer->UpdatePlayerSetting(ModResScrollString, SETTING_RS_DISABLE, disable);
 
-        if (!enable)
+        if (!disable)
             targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses enabled. You will now earn rested experience upon leveling up.");
         else
             targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses disabled.");
 
         // Notify the command issuer
         if (handler->GetSession()->GetPlayer() != targetPlayer)
-            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for player {} ({}).", enable ? "disabled" : "enabled", targetPlayer->GetName(), targetPlayer->GetGUID().GetCounter());
+            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for player {} ({}).", disable ? "disabled" : "enabled", targetPlayer->GetName(), targetPlayer->GetGUID().GetCounter());
         else
-            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for yourself.", enable ? "disabled" : "enabled");
+            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for yourself.", disable ? "disabled" : "enabled");
 
         return true;
     }
