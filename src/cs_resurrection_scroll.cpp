@@ -64,7 +64,11 @@ public:
         if (!disable)
             targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses enabled. You will now earn rested experience upon leveling up.");
         else
-            targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses disabled.");
+        {
+            targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses disabled. You will no longer earn rested experience upon leveling.");
+            targetPlayer->SendSystemMessage("DISCLAIMER: Rested XP is a game mechanic earned while resting in capital cities or inns. You will still be granted rested XP gained by regular means.");
+            targetPlayer->SendSystemMessage("Rested XP you already gained through Scroll of Resurrection or other means will NOT be removed!");
+        }
 
         // Notify the command issuer
         if (!handler->GetSession() || handler->GetSession()->GetPlayer() != targetPlayer)
