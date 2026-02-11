@@ -98,15 +98,13 @@ public:
         {
             accountId = handler->GetSession()->GetAccountId();
         }
-        else
-        {
-            handler->SendErrorMessage("Console usage: .rscroll info <account name or id>");
-            return false;
-        }
+
+        std::string accountName;
+        AccountMgr::GetName(accountId, accountName);
 
         if (!sResScroll->IsAccountLoaded(accountId))
         {
-            handler->PSendSysMessage("No Scroll of Resurrection data found for account {}.", accountId);
+            handler->PSendSysMessage("No Scroll of Resurrection data found for account {} (ID: {}).", accountName, accountId);
             return true;
         }
 
@@ -116,11 +114,11 @@ public:
 
         if (data.Expired || data.EndDate <= GameTime::GetGameTime().count())
         {
-            handler->PSendSysMessage("Scroll of Resurrection bonus for account {} expired on: {:%Y-%m-%d %H:%M}.", accountId, endTime);
+            handler->PSendSysMessage("Scroll of Resurrection bonus for account {} (ID: {}) expired on: {:%Y-%m-%d %H:%M}.", accountName, accountId, endTime);
             return true;
         }
 
-        handler->PSendSysMessage("Scroll of Resurrection bonus for account {} expires on: {:%Y-%m-%d %H:%M}.", accountId, endTime);
+        handler->PSendSysMessage("Scroll of Resurrection bonus for account {} (ID: {}) expires on: {:%Y-%m-%d %H:%M}.", accountName, accountId, endTime);
         return true;
     }
 };
