@@ -17,6 +17,7 @@
 
 #include "AccountMgr.h"
 #include "Chat.h"
+#include "GameTime.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -33,7 +34,8 @@ public:
     {
         static ChatCommandTable scrollTable =
         {
-            { "disable", HandleResScrollRestedXpCommand, SEC_PLAYER, Console::Yes }
+            { "disable", HandleResScrollRestedXpCommand, SEC_PLAYER, Console::Yes },
+            { "info",    HandleResScrollInfoCommand,     SEC_PLAYER, Console::Yes }
         };
 
         static ChatCommandTable commandTable =
@@ -76,6 +78,49 @@ public:
         else
             handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for yourself.", disable ? "disabled" : "enabled");
 
+        return true;
+    }
+
+    static bool HandleResScrollInfoCommand(ChatHandler* handler, Optional<AccountIdentifier> account)
+    {
+        uint32 accountId = 0;
+
+        if (handler->GetSession() && AccountMgr::IsPlayerAccount(handler->GetSession()->GetSecurity()))
+        {
+            // Players can only view their own info
+            accountId = handler->GetSession()->GetAccountId();
+        }
+        else if (account)
+        {
+            accountId = account->GetID();
+        }
+        else if (handler->GetSession())
+        {
+            accountId = handler->GetSession()->GetAccountId();
+        }
+        else
+        {
+            handler->SendErrorMessage("Console usage: .rscroll info <account name or id>");
+            return false;
+        }
+
+        if (!sResScroll->IsAccountLoaded(accountId))
+        {
+            handler->PSendSysMessage("No Scroll of Resurrection data found for account {}.", accountId);
+            return true;
+        }
+
+        ScrollAccountData const& data = sResScroll->GetAccountData(accountId);
+
+        tm endTime = Acore::Time::TimeBreakdown(data.EndDate);
+
+        if (data.Expired || data.EndDate <= GameTime::GetGameTime().count())
+        {
+            handler->PSendSysMessage("Scroll of Resurrection bonus for account {} expired on: {:%Y-%m-%d %H:%M}.", accountId, endTime);
+            return true;
+        }
+
+        handler->PSendSysMessage("Scroll of Resurrection bonus for account {} expires on: {:%Y-%m-%d %H:%M}.", accountId, endTime);
         return true;
     }
 };
