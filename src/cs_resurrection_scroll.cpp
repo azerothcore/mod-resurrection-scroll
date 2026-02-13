@@ -102,23 +102,51 @@ public:
         std::string accountName;
         AccountMgr::GetName(accountId, accountName);
 
+        // Get last logout time for the account
+        uint32 lastLogout = 0;
+        if (QueryResult result = CharacterDatabase.Query(
+            "SELECT MAX(logout_time) FROM characters WHERE account = {}", accountId))
+        {
+            Field* fields = result->Fetch();
+            if (!fields->IsNull())
+                lastLogout = fields[0].Get<uint32>();
+        }
+
+        if (lastLogout)
+        {
+            tm logoutTime = Acore::Time::TimeBreakdown(lastLogout);
+            handler->PSendSysMessage("Account {} (ID: {}) last logged in: {:%Y-%m-%d %H:%M}.", accountName, accountId, logoutTime);
+        }
+        else
+            handler->PSendSysMessage("Account {} (ID: {}) has no login history.", accountName, accountId);
+
         if (!sResScroll->IsAccountLoaded(accountId))
         {
-            handler->PSendSysMessage("No Scroll of Resurrection data found for account {} (ID: {}).", accountName, accountId);
+            if (lastLogout)
+            {
+                uint32 eligibleDate = lastLogout + (sResScroll->DaysInactive * DAY);
+                tm eligibleTime = Acore::Time::TimeBreakdown(eligibleDate);
+                handler->PSendSysMessage("Eligible for Scroll of Resurrection on: {:%Y-%m-%d %H:%M}.", eligibleTime);
+            }
             return true;
         }
 
         ScrollAccountData const& data = sResScroll->GetAccountData(accountId);
-
         tm endTime = Acore::Time::TimeBreakdown(data.EndDate);
 
         if (data.Expired || data.EndDate <= GameTime::GetGameTime().count())
         {
-            handler->PSendSysMessage("Scroll of Resurrection bonus for account {} (ID: {}) expired on: {:%Y-%m-%d %H:%M}.", accountName, accountId, endTime);
+            handler->PSendSysMessage("Scroll bonus expired on: {:%Y-%m-%d %H:%M}.", endTime);
+            if (lastLogout)
+            {
+                uint32 eligibleDate = lastLogout + (sResScroll->DaysInactive * DAY);
+                tm eligibleTime = Acore::Time::TimeBreakdown(eligibleDate);
+                handler->PSendSysMessage("Eligible again on: {:%Y-%m-%d %H:%M}.", eligibleTime);
+            }
             return true;
         }
 
-        handler->PSendSysMessage("Scroll of Resurrection bonus for account {} (ID: {}) expires on: {:%Y-%m-%d %H:%M}.", accountName, accountId, endTime);
+        handler->PSendSysMessage("Scroll bonus expires on: {:%Y-%m-%d %H:%M}.", endTime);
         return true;
     }
 };
