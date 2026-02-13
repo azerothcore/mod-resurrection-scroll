@@ -112,6 +112,8 @@ public:
                 lastLogout = fields[0].Get<uint32>();
         }
 
+        handler->PSendSysMessage("Days inactive required: {}.", sResScroll->DaysInactive);
+
         if (lastLogout)
         {
             tm logoutTime = Acore::Time::TimeBreakdown(lastLogout);
