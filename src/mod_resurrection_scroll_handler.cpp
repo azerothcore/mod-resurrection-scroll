@@ -34,7 +34,7 @@ void ResurrectionScroll::LoadAccountData()
 void ResurrectionScroll::InsertAccountData(ScrollAccountData data)
 {
     Accounts[data.AccountId] = data;
-    CharacterDatabase.Execute("INSERT IGNORE INTO mod_ress_scroll_accounts (AccountId, EndDate) VALUES ({}, {})", data.AccountId, data.EndDate);
+    CharacterDatabase.Execute("REPLACE INTO mod_ress_scroll_accounts (AccountId, EndDate) VALUES ({}, {})", data.AccountId, data.EndDate);
 }
 
 void ResurrectionScroll::SetExpired(uint32 accountId)
