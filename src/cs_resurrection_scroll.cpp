@@ -46,7 +46,7 @@ public:
         return commandTable;
     }
 
-    static bool HandleResScrollRestedXpCommand(ChatHandler* handler, Optional<PlayerIdentifier> player, bool disable)
+    static bool HandleResScrollRestedXpCommand(ChatHandler* handler, Optional<PlayerIdentifier> player, Optional<bool> disable)
     {
         if (handler->GetSession() && AccountMgr::IsPlayerAccount(handler->GetSession()->GetSecurity()))
             player = PlayerIdentifier::FromSelf(handler);
@@ -61,9 +61,13 @@ public:
             return false;
         }
 
-        targetPlayer->UpdatePlayerSetting(ModResScrollString, SETTING_RS_DISABLE, disable);
+        bool newDisabled = disable.has_value()
+            ? *disable
+            : !targetPlayer->GetPlayerSetting(ModResScrollString, SETTING_RS_DISABLE).IsEnabled();
 
-        if (!disable)
+        targetPlayer->UpdatePlayerSetting(ModResScrollString, SETTING_RS_DISABLE, newDisabled ? 1 : 0);
+
+        if (!newDisabled)
             targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses enabled. You will now earn rested experience upon leveling up.");
         else
         {
@@ -72,11 +76,11 @@ public:
             targetPlayer->SendSystemMessage("Rested XP you already gained through Scroll of Resurrection or other means will NOT be removed!");
         }
 
-        // Notify the command issuer
-        if (!handler->GetSession() || handler->GetSession()->GetPlayer() != targetPlayer)
-            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for player {} ({}).", disable ? "disabled" : "enabled", targetPlayer->GetName(), targetPlayer->GetGUID().GetCounter());
+        Player* issuer = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
+        if (issuer != targetPlayer)
+            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for player {} ({}).", newDisabled ? "disabled" : "enabled", targetPlayer->GetName(), targetPlayer->GetGUID().GetCounter());
         else
-            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for yourself.", disable ? "disabled" : "enabled");
+            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for yourself.", newDisabled ? "disabled" : "enabled");
 
         return true;
     }
