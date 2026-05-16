@@ -61,19 +61,14 @@ public:
         {
             if (player->GetPlayerSetting(ModResScrollString, SETTING_RS_DISABLE).IsEnabled())
             {
-                player->SendSystemMessage(
-                    "|cffff0000You are eligible for the Scroll of Resurrection bonus, but it has been disabled. You can enable it to receive rewards.|r"
-                );
+                ChatHandler(player->GetSession()).PSendModuleSysMessage(ModResScrollString, LANG_MOD_BONUS_DISABLED_NOTIFY);
                 return false;
             }
 
             player->SetRestBonus(sObjectMgr->GetXPForLevel(player->GetLevel()));
 
             tm endTime = Acore::Time::TimeBreakdown(accountData.EndDate);
-            ChatHandler(player->GetSession()).PSendSysMessage(
-                "|cff00ccffYou are eligible for the Scroll of Resurrection program, granting you rested experience until {:%Y-%m-%d %H:%M}.|r",
-                endTime
-            );
+            ChatHandler(player->GetSession()).PSendModuleSysMessage(ModResScrollString, LANG_MOD_BONUS_ACTIVE_NOTIFY, endTime);
             return true;
         }
 

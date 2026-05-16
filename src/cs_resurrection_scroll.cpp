@@ -57,7 +57,8 @@ public:
         Player* targetPlayer = player ? player->GetConnectedPlayer() : nullptr;
         if (!targetPlayer)
         {
-            handler->SendErrorMessage("Player not found or not online.");
+            handler->PSendModuleSysMessage(ModResScrollString, LANG_MOD_PLAYER_NOT_FOUND);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
@@ -67,20 +68,24 @@ public:
 
         targetPlayer->UpdatePlayerSetting(ModResScrollString, SETTING_RS_DISABLE, newDisabled ? 1 : 0);
 
+        ChatHandler targetHandler(targetPlayer->GetSession());
         if (!newDisabled)
-            targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses enabled. You will now earn rested experience upon leveling up.");
+            targetHandler.PSendModuleSysMessage(ModResScrollString, LANG_MOD_BONUS_ENABLED);
         else
         {
-            targetPlayer->SendSystemMessage("Scroll of Resurrection bonuses disabled. You will no longer earn rested experience upon leveling.");
-            targetPlayer->SendSystemMessage("DISCLAIMER: Rested XP is a game mechanic earned while resting in capital cities or inns. You will still be granted rested XP gained by regular means.");
-            targetPlayer->SendSystemMessage("Rested XP you already gained through Scroll of Resurrection or other means will NOT be removed!");
+            targetHandler.PSendModuleSysMessage(ModResScrollString, LANG_MOD_BONUS_DISABLED);
+            targetHandler.PSendModuleSysMessage(ModResScrollString, LANG_MOD_DISCLAIMER_RESTED_XP);
+            targetHandler.PSendModuleSysMessage(ModResScrollString, LANG_MOD_DISCLAIMER_NO_REMOVAL);
         }
 
         Player* issuer = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
         if (issuer != targetPlayer)
-            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for player {} ({}).", newDisabled ? "disabled" : "enabled", targetPlayer->GetName(), targetPlayer->GetGUID().GetCounter());
+            handler->PSendModuleSysMessage(ModResScrollString,
+                newDisabled ? LANG_MOD_ADMIN_DISABLED_OTHER : LANG_MOD_ADMIN_ENABLED_OTHER,
+                targetPlayer->GetName(), targetPlayer->GetGUID().GetCounter());
         else
-            handler->PSendSysMessage("Scroll of Resurrection rested bonuses {} for yourself.", newDisabled ? "disabled" : "enabled");
+            handler->PSendModuleSysMessage(ModResScrollString,
+                newDisabled ? LANG_MOD_ADMIN_DISABLED_SELF : LANG_MOD_ADMIN_ENABLED_SELF);
 
         return true;
     }
@@ -116,15 +121,15 @@ public:
                 lastLogout = fields[0].Get<uint32>();
         }
 
-        handler->PSendSysMessage("Days inactive required: {}.", sResScroll->DaysInactive);
+        handler->PSendModuleSysMessage(ModResScrollString, LANG_MOD_INFO_DAYS_REQUIRED, sResScroll->DaysInactive);
 
         if (lastLogout)
         {
             tm logoutTime = Acore::Time::TimeBreakdown(lastLogout);
-            handler->PSendSysMessage("Account {} (ID: {}) last logged in: {:%Y-%m-%d %H:%M}.", accountName, accountId, logoutTime);
+            handler->PSendModuleSysMessage(ModResScrollString, LANG_MOD_INFO_LAST_LOGIN, accountName, accountId, logoutTime);
         }
         else
-            handler->PSendSysMessage("Account {} (ID: {}) has no login history.", accountName, accountId);
+            handler->PSendModuleSysMessage(ModResScrollString, LANG_MOD_INFO_NO_LOGIN_HISTORY, accountName, accountId);
 
         if (!sResScroll->IsAccountLoaded(accountId))
         {
@@ -132,7 +137,7 @@ public:
             {
                 uint32 eligibleDate = lastLogout + (sResScroll->DaysInactive * DAY);
                 tm eligibleTime = Acore::Time::TimeBreakdown(eligibleDate);
-                handler->PSendSysMessage("Eligible for Scroll of Resurrection on: {:%Y-%m-%d %H:%M}.", eligibleTime);
+                handler->PSendModuleSysMessage(ModResScrollString, LANG_MOD_INFO_ELIGIBLE_ON, eligibleTime);
             }
             return true;
         }
@@ -142,17 +147,17 @@ public:
 
         if (data.Expired || data.EndDate <= GameTime::GetGameTime().count())
         {
-            handler->PSendSysMessage("Scroll bonus expired on: {:%Y-%m-%d %H:%M}.", endTime);
+            handler->PSendModuleSysMessage(ModResScrollString, LANG_MOD_INFO_EXPIRED_ON, endTime);
             if (lastLogout)
             {
                 uint32 eligibleDate = lastLogout + (sResScroll->DaysInactive * DAY);
                 tm eligibleTime = Acore::Time::TimeBreakdown(eligibleDate);
-                handler->PSendSysMessage("Eligible again on: {:%Y-%m-%d %H:%M}.", eligibleTime);
+                handler->PSendModuleSysMessage(ModResScrollString, LANG_MOD_INFO_ELIGIBLE_AGAIN, eligibleTime);
             }
             return true;
         }
 
-        handler->PSendSysMessage("Scroll bonus expires on: {:%Y-%m-%d %H:%M}.", endTime);
+        handler->PSendModuleSysMessage(ModResScrollString, LANG_MOD_INFO_EXPIRES_ON, endTime);
         return true;
     }
 };
